@@ -21,6 +21,7 @@
             --coral: #FF6B6B;
             --coral-dim: rgba(255,107,107,0.12);
             --amber: #F2B84B;
+            --amber-dim: rgba(242,184,75,0.12);
         }
 
         * { box-sizing: border-box; }
@@ -182,7 +183,7 @@
             pointer-events: none;
         }
 
-        /* Custom link input */
+        /* Custom link input and Select drop-down styling */
         .input-group { margin-top: 22px; text-align: left; }
 
         .input-group label {
@@ -222,7 +223,7 @@
             flex-shrink: 0;
         }
 
-        .input-group input[type="text"] {
+        .input-group input[type="text"], .input-group select {
             flex: 1;
             min-width: 0;
             padding: 10px 12px;
@@ -232,6 +233,24 @@
             font-family: 'JetBrains Mono', monospace;
             font-size: 13px;
             outline: none;
+        }
+
+        .input-group select {
+            background-color: #0E141C;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237F8CA0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        .input-group select:focus {
+            border-color: var(--teal);
         }
 
         .input-group input[type="text"]::placeholder {
@@ -277,7 +296,7 @@
             cursor: not-allowed;
         }
 
-        .btn:focus-visible, .dropzone:focus-within, .input-group input:focus-visible {
+        .btn:focus-visible, .dropzone:focus-within, .input-group input:focus-visible, .input-group select:focus-visible {
             outline: 2px solid var(--teal);
             outline-offset: 2px;
         }
@@ -356,6 +375,21 @@
 
         .copy-btn:hover { color: var(--teal); border-color: var(--teal); }
 
+        /* Realtime Ticker Area styling */
+        .expiry-ticker {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--amber);
+            background: var(--amber-dim);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(242,184,75,0.25);
+        }
+
         .error-box {
             background: var(--coral-dim);
             border: 1px solid rgba(255,107,107,0.35);
@@ -380,7 +414,7 @@
         }
 
         @media (hover: none) and (pointer: coarse) {
-            .btn, .copy-btn, .dropzone, .input-group input[type="text"] {
+            .btn, .copy-btn, .dropzone, .input-group input[type="text"], .input-group select {
                 min-height: 44px;
             }
         }
@@ -421,6 +455,19 @@
                     <div id="status-msg"></div>
                 </div>
 
+                <div class="input-group">
+                    <label for="expiry">Link Expiration Period</label>
+                    <select id="expiry" name="expiry">
+                        <option value="1" selected>1 Day</option>
+                        <option value="2">2 Days</option>
+                        <option value="5">5 Days</option>
+                        <option value="10">10 Days</option>
+                        <option value="15">15 Days</option>
+                        <option value="20">20 Days</option>
+                        <option value="30">1 Month</option>
+                    </select>
+                </div>
+
                 <button type="submit" id="submit-btn" class="btn">
                     <span class="spinner" id="btn-spinner"></span>
                     <span id="btn-label">Generate shareable link</span>
@@ -437,6 +484,14 @@
                         <a href="{{ link }}" target="_blank" id="generated-link">{{ link }}</a>
                         <button type="button" class="copy-btn" id="copy-btn" data-link="{{ link }}">Copy</button>
                     </div>
+                    
+                    <!-- New UI feature block: Live countdown container -->
+                    {% if expires_at_iso %}
+                    <div class="expiry-ticker">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points='12 6 12 12 16 14'/></svg>
+                        <span>Expires in: <span id="countdown" data-timestamp="{{ expires_at_iso }}">Calculating...</span></span>
+                    </div>
+                    {% endif %}
                 </div>
             {% endif %}
 
@@ -553,6 +608,39 @@
                     setTimeout(() => { this.textContent = original; }, 1500);
                 });
             });
+        }
+
+        // --- JavaScript Running Countdown Timer Engine ---
+        const countdownEl = document.getElementById('countdown');
+        if (countdownEl) {
+            const targetTime = new Date(countdownEl.dataset.timestamp).getTime();
+
+            function updateTimer() {
+                const now = new Date().getTime();
+                const difference = targetTime - now;
+
+                if (difference <= 0) {
+                    countdownEl.textContent = "Expired";
+                    countdownEl.style.color = "var(--coral)";
+                    return;
+                }
+
+                // Math for calculating days, hours, minutes, and seconds remaining
+                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+                let displayString = "";
+                if (days > 0) displayString += `${days}d `;
+                if (hours > 0 || days > 0) displayString += `${hours}h `;
+                displayString += `${minutes}m ${seconds}s`;
+
+                countdownEl.textContent = displayString;
+            }
+
+            updateTimer(); // Initial kickstart immediately
+            setInterval(updateTimer, 1000); // Ticks every 1 second
         }
     </script>
 </body>
