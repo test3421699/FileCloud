@@ -29,7 +29,7 @@
             font-family: 'Inter', sans-serif;
             margin: 0;
             min-height: 100vh;
-            padding: 48px 20px;
+            padding: clamp(20px, 6vw, 48px) 16px;
             background:
                 radial-gradient(circle at 15% 0%, rgba(46,217,195,0.07), transparent 45%),
                 radial-gradient(circle at 85% 100%, rgba(255,107,107,0.06), transparent 45%),
@@ -80,7 +80,7 @@
 
         h1 {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 30px;
+            font-size: clamp(22px, 5.5vw, 30px);
             font-weight: 700;
             line-height: 1.25;
             margin: 0 0 10px;
@@ -89,16 +89,16 @@
 
         .subtitle {
             color: var(--text-muted);
-            font-size: 14.5px;
+            font-size: 14px;
             line-height: 1.55;
-            margin: 0 0 28px;
+            margin: 0 0 24px;
         }
 
         .card {
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 28px;
+            padding: clamp(18px, 5vw, 28px);
             box-shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
         }
 
@@ -106,13 +106,14 @@
         .dropzone {
             position: relative;
             border-radius: 12px;
-            padding: 32px 20px;
+            padding: clamp(24px, 6vw, 32px) 16px;
             text-align: center;
             cursor: pointer;
             background: var(--border-soft);
             border: 1.5px dashed #2B3644;
             transition: border-color 0.2s ease, background 0.2s ease;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .dropzone.drag-over {
@@ -164,16 +165,21 @@
             color: var(--teal);
             background: var(--teal-dim);
             display: inline-block;
+            max-width: 100%;
             padding: 5px 10px;
             border-radius: 6px;
             position: relative;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         input[type="file"] {
-            position: absolute;
-            inset: 0;
+            position: fixed;
+            top: -9999px;
+            left: -9999px;
             opacity: 0;
-            cursor: pointer;
+            pointer-events: none;
         }
 
         /* Custom link input */
@@ -204,15 +210,16 @@
         }
 
         .link-prefix {
-            padding: 10px 10px 10px 14px;
+            padding: 10px 8px 10px 12px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
+            font-size: 12.5px;
             color: var(--text-muted);
             background: var(--border-soft);
             display: flex;
             align-items: center;
             white-space: nowrap;
             border-right: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
         .input-group input[type="text"] {
@@ -358,6 +365,29 @@
         }
 
         .error-box strong { color: var(--coral); font-weight: 600; }
+
+        /* --- Responsive --- */
+        @media (min-width: 640px) {
+            .wrap { max-width: 520px; }
+        }
+
+        @media (max-width: 400px) {
+            .eyebrow { font-size: 11px; }
+            h1 { font-size: 21px; }
+            .subtitle { font-size: 13px; }
+            .link-prefix { display: none; }
+            .dz-sub { font-size: 12px; }
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .copy-btn, .dropzone, .input-group input[type="text"] {
+                min-height: 44px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .dropzone::before { animation: none; }
+        }
     </style>
 </head>
 <body>
@@ -370,16 +400,17 @@
             <form method="post" enctype="multipart/form-data" id="upload-form">
                 {% csrf_token %}
 
-                <label class="dropzone" id="dropzone" tabindex="0">
+                <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Choose a file to upload">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 16V4M12 4l-4 4M12 4l4 4"/>
                         <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
                     </svg>
-                    <div class="dz-label" id="dz-label">Drag & drop a file, or click to browse</div>
+                    <div class="dz-label" id="dz-label">Drag & drop a file, or tap to browse</div>
                     <div class="dz-sub">Any file type, up to your plan's size limit</div>
                     <span class="dz-filename" id="dz-filename" style="display:none;"></span>
-                    <input type="file" name="myfile" id="file-input" required>
-                </label>
+                </div>
+                <input type="file" name="myfile" id="file-input" required>
+                <div id="file-error" style="display:none;color:#FF6B6B;font-size:12.5px;margin-top:8px;">Please choose a file to upload.</div>
 
                 <div class="input-group">
                     <label for="custom_name">Customize link ending (optional)</label>
@@ -458,12 +489,24 @@
                 });
         });
 
+        const fileError = document.getElementById('file-error');
+
+        // Open native file picker exactly once per interaction
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                fileInput.click();
+            }
+        });
+
         // File selection + filename preview
         fileInput.addEventListener('change', function () {
             if (this.files && this.files.length > 0) {
                 dzLabel.textContent = 'Ready to upload';
                 dzFilename.style.display = 'inline-block';
                 dzFilename.textContent = this.files[0].name;
+                fileError.style.display = 'none';
             }
         });
 
@@ -488,7 +531,12 @@
         });
 
         // Loading state on submit
-        form.addEventListener('submit', function () {
+        form.addEventListener('submit', function (e) {
+            if (!fileInput.files || fileInput.files.length === 0) {
+                e.preventDefault();
+                fileError.style.display = 'block';
+                return;
+            }
             if (submitBtn.disabled) return;
             submitBtn.disabled = true;
             btnSpinner.style.display = 'inline-block';
