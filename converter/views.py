@@ -1,4 +1,5 @@
 import re
+import uuid
 from datetime import timedelta
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, Http404, JsonResponse
@@ -13,7 +14,7 @@ def upload_file(request):
     
     if request.method == 'POST' and request.FILES.get('myfile'):
         custom_name = request.POST.get('custom_name', '').strip().lower()
-        expiry_days = request.POST.get('expiry', '1')  # Defaults to 1 day if fallback occurs
+        expiry_days = request.POST.get('expiry', '1')
         
         # Calculate exactly when this file lifecycle ends
         now = timezone.now()
@@ -51,13 +52,24 @@ def upload_file(request):
     })
 
 def download_file(request, file_identifier):
-    # Lookup file checking both the UUID field and the custom slug field
-    uploaded_file = get_object_or_404(
-        UploadedFile, 
-        Q(id=file_identifier) | Q(custom_slug=file_identifier)
-    )
+    # Determine if the identifier is a valid UUID string to prevent database crashes
+    is_valid_uuid = False
+    try:
+        uuid.UUID(file_identifier)
+        is_valid_uuid = True
+    except ValueError:
+        is_valid_uuid = False
+
+    # Query carefully based on the format format to protect UUIDField lookups
+    if is_valid_uuid:
+        uploaded_file = get_object_or_404(
+            UploadedFile, 
+            Q(id=file_identifier) | Q(custom_slug=file_identifier)
+        )
+    else:
+        uploaded_file = get_object_or_404(UploadedFile, custom_slug=file_identifier)
     
-    # Enforce file age security restriction out on the download view layer
+    # Enforce file age restriction right at download view execution
     if timezone.now() > uploaded_file.expires_at:
         if uploaded_file.file:
             uploaded_file.file.delete(save=False)
@@ -65,6 +77,7 @@ def download_file(request, file_identifier):
         raise Http404("This link has expired and the file was removed.")
         
     try:
+        # Deliver generic byte stream directly forcing an attachment download
         response = HttpResponse(uploaded_file.file, content_type='application/octet-stream')
         response['Content-Disposition'] = f'attachment; filename="{uploaded_file.file.name.split("/")[-1]}"'
         return response
