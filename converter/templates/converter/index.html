@@ -197,6 +197,7 @@
             margin-bottom: 8px;
         }
 
+        /* FIXED Responsive URL Field Layout */
         .link-field {
             display: flex;
             align-items: stretch;
@@ -210,21 +211,24 @@
         .link-field:focus-within { border-color: var(--teal); }
 
         .link-prefix {
-            padding: 10px 8px 10px 12px;
+            padding: 10px 12px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 12.5px;
+            font-size: 12px;
             color: var(--text-muted);
             background: var(--border-soft);
             display: flex;
             align-items: center;
-            white-space: nowrap;
             border-right: 1px solid var(--border);
-            flex-shrink: 0;
+            flex-shrink: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .input-group input[type="text"], .input-group select {
-            flex: 1;
-            min-width: 0;
+            flex: 2;
+            min-width: 80px;
             padding: 10px 12px;
             border: none;
             background: transparent;
@@ -340,9 +344,17 @@
         .history-item { background: var(--card); border: 1px solid var(--border-soft); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
         .history-filename { font-size: 13.5px; font-weight: 500; margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        /* --- Responsive --- */
+        /* Responsive Breakpoints */
         @media (min-width: 640px) { .wrap { max-width: 520px; } }
-        @media (max-width: 400px) { .eyebrow { font-size: 11px; } h1 { font-size: 21px; } .subtitle { font-size: 13px; } .link-prefix { display: none; } .dz-sub { font-size: 12px; } }
+        
+        /* FIXED: Drop prefix to stack vertically if screen drops below 420px */
+        @media (max-width: 420px) {
+            .link-field { flex-direction: column; align-items: stretch; }
+            .link-prefix { border-right: none; border-bottom: 1px solid var(--border); padding: 8px 12px; font-size: 11px; }
+            .input-group input[type="text"] { width: 100%; padding: 12px; }
+        }
+        
+        @media (max-width: 400px) { .eyebrow { font-size: 11px; } h1 { font-size: 21px; } .subtitle { font-size: 13px; } .dz-sub { font-size: 12px; } }
         @media (hover: none) and (pointer: coarse) { .btn, .copy-btn, .dropzone, .input-group input[type="text"], .input-group select { min-height: 44px; } }
         @media (prefers-reduced-motion: reduce) { .dropzone::before { animation: none; } }
     </style>
@@ -418,7 +430,7 @@
             {% endif %}
 
             {% if error %}
-                <div class="error-box">
+                <div class="error-box" id="backend-error-box">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
                     <div><strong>Error:</strong> {{ error }}</div>
                 </div>
@@ -436,7 +448,6 @@
     </div>
 
     <script>
-        // Update URL text prefix relative to current domain dynamically
         document.getElementById('ui-prefix').textContent = window.location.host + '/download/';
 
         const input = document.getElementById('custom_name');
@@ -450,12 +461,18 @@
         const dzFilename = document.getElementById('dz-filename');
         const form = document.getElementById('upload-form');
         const fileError = document.getElementById('file-error');
+        const backendErrorBox = document.getElementById('backend-error-box');
 
-        // Live slug availability check
+        // FIXED: Clear messages and availability state dynamically on user modification
         input.addEventListener('input', function () {
             let value = this.value.trim().toLowerCase();
             value = value.replace(/[^a-z0-9-_]/g, '');
             this.value = value;
+
+            // Hide old backend error boxes immediately when the user alters text
+            if (backendErrorBox) {
+                backendErrorBox.style.display = 'none';
+            }
 
             if (value.length === 0) {
                 statusMsg.innerHTML = '';
@@ -486,7 +503,6 @@
                 dzFilename.style.display = 'inline-block';
                 dzFilename.textContent = this.files[0].name;
                 fileError.style.display = 'none';
-                // Cache current filename temporarily for history inclusion
                 localStorage.setItem('last_uploaded_name', this.files[0].name);
             }
         });
@@ -505,7 +521,6 @@
             btnLabel.textContent = 'Generating…';
         });
 
-        // Global clipboard registration
         document.addEventListener('click', function(e) {
             if (e.target && e.target.classList.contains('copy-action-btn')) {
                 navigator.clipboard.writeText(e.target.dataset.link).then(() => {
@@ -516,20 +531,18 @@
             }
         });
 
-        // --- LocalStorage Link Tracking Engine ---
+        // LocalStorage History List
         const historySection = document.getElementById('history-section');
         const historyContainer = document.getElementById('history-container');
         const clearHistoryBtn = document.getElementById('clear-history-btn');
 
-        // Check if backend just handed back a new link to register
         {% if link and expires_at_iso %}
             const freshLink = "{{ link }}";
             const freshExpiry = "{{ expires_at_iso }}";
             const freshName = localStorage.getItem('last_uploaded_name') || "Shared File";
-            localStorage.removeItem('last_uploaded_name'); // Clear cached state
+            localStorage.removeItem('last_uploaded_name');
 
             let currentHistory = JSON.parse(localStorage.getItem('file_link_history')) || [];
-            // De-duplicate if link matches an older item
             currentHistory = currentHistory.filter(item => item.url !== freshLink);
             currentHistory.unshift({ name: freshName, url: freshLink, expires: freshExpiry });
             localStorage.setItem('file_link_history', JSON.stringify(currentHistory));
@@ -539,7 +552,6 @@
             let historyData = JSON.parse(localStorage.getItem('file_link_history')) || [];
             const now = new Date().getTime();
 
-            // Auto-filter out entries that have completely reached expiration 
             historyData = historyData.filter(item => new Date(item.expires).getTime() - now > 0);
             localStorage.setItem('file_link_history', JSON.stringify(historyData));
 
@@ -573,7 +585,6 @@
             loadHistoryList();
         });
 
-        // --- Core Countdown Animation Ticker ---
         function runGlobalCountdownTickers() {
             const tickers = document.querySelectorAll('.countdown-ticker');
             const now = new Date().getTime();
@@ -603,13 +614,11 @@
                 ticker.textContent = display;
             });
 
-            // Re-render structural tree if any file cross-expired inside current session
             if (stateChanged) {
                 setTimeout(loadHistoryList, 1500);
             }
         }
 
-        // Execution Hooks
         loadHistoryList();
         runGlobalCountdownTickers();
         setInterval(runGlobalCountdownTickers, 1000);
