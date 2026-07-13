@@ -4,31 +4,508 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File to Link Converter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #f9f9fb; color: #333; }
-        .card { padding: 30px; border: 2px dashed #cbd5e1; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; }
-        .btn { background: #2563eb; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 15px; }
-        .btn:hover { background: #1d4ed8; }
-        .result-box { margin-top: 25px; padding: 15px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; color: #166534; word-break: break-all; text-align: left; }
-        a { color: #2563eb; font-weight: 500; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        :root {
+            --bg: #0B0F14;
+            --bg-grid: rgba(255,255,255,0.035);
+            --card: #121822;
+            --border: #232C38;
+            --border-soft: #1B222C;
+            --text: #E7ECF2;
+            --text-muted: #7F8CA0;
+            --teal: #2ED9C3;
+            --teal-dim: rgba(46,217,195,0.12);
+            --coral: #FF6B6B;
+            --coral-dim: rgba(255,107,107,0.12);
+            --amber: #F2B84B;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            padding: 48px 20px;
+            background:
+                radial-gradient(circle at 15% 0%, rgba(46,217,195,0.07), transparent 45%),
+                radial-gradient(circle at 85% 100%, rgba(255,107,107,0.06), transparent 45%),
+                var(--bg);
+            background-attachment: fixed;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(var(--bg-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+            background-size: 42px 42px;
+            mask-image: radial-gradient(circle at 50% 30%, black, transparent 70%);
+        }
+
+        .wrap {
+            width: 100%;
+            max-width: 480px;
+            position: relative;
+        }
+
+        .eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            color: var(--teal);
+            margin-bottom: 14px;
+        }
+
+        .eyebrow .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--teal);
+            box-shadow: 0 0 0 3px var(--teal-dim);
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 30px;
+            font-weight: 700;
+            line-height: 1.25;
+            margin: 0 0 10px;
+            letter-spacing: -0.01em;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 14.5px;
+            line-height: 1.55;
+            margin: 0 0 28px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
+        }
+
+        /* Dropzone */
+        .dropzone {
+            position: relative;
+            border-radius: 12px;
+            padding: 32px 20px;
+            text-align: center;
+            cursor: pointer;
+            background: var(--border-soft);
+            border: 1.5px dashed #2B3644;
+            transition: border-color 0.2s ease, background 0.2s ease;
+            overflow: hidden;
+        }
+
+        .dropzone.drag-over {
+            border-color: var(--teal);
+            background: rgba(46,217,195,0.06);
+        }
+
+        .dropzone::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -50%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(46,217,195,0.08), transparent);
+            animation: scan 5s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { left: -50%; }
+            100% { left: 100%; }
+        }
+
+        .dropzone svg {
+            width: 30px;
+            height: 30px;
+            stroke: var(--text-muted);
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .dz-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            position: relative;
+        }
+
+        .dz-sub {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            position: relative;
+        }
+
+        .dz-filename {
+            margin-top: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            color: var(--teal);
+            background: var(--teal-dim);
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Custom link input */
+        .input-group { margin-top: 22px; text-align: left; }
+
+        .input-group label {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .link-field {
+            display: flex;
+            align-items: stretch;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #0E141C;
+            transition: border-color 0.15s ease;
+        }
+
+        .link-field:focus-within {
+            border-color: var(--teal);
+        }
+
+        .link-prefix {
+            padding: 10px 10px 10px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-muted);
+            background: var(--border-soft);
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            border-right: 1px solid var(--border);
+        }
+
+        .input-group input[type="text"] {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 12px;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .input-group input[type="text"]::placeholder {
+            color: #4B5666;
+        }
+
+        #status-msg {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12.5px;
+            margin-top: 8px;
+            font-weight: 500;
+            min-height: 16px;
+        }
+
+        /* Button */
+        .btn {
+            width: 100%;
+            margin-top: 22px;
+            background: var(--teal);
+            color: #06201B;
+            border: none;
+            padding: 13px 20px;
+            border-radius: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: filter 0.15s ease, transform 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover:not(:disabled) { filter: brightness(1.08); }
+        .btn:active:not(:disabled) { transform: scale(0.99); }
+
+        .btn:disabled {
+            background: #2A313C;
+            color: #6B7686;
+            cursor: not-allowed;
+        }
+
+        .btn:focus-visible, .dropzone:focus-within, .input-group input:focus-visible {
+            outline: 2px solid var(--teal);
+            outline-offset: 2px;
+        }
+
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(6,32,27,0.3);
+            border-top-color: #06201B;
+            border-radius: 50%;
+            display: none;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Result / error */
+        .result-box, .error-box {
+            margin-top: 22px;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 13.5px;
+        }
+
+        .result-box {
+            background: var(--teal-dim);
+            border: 1px solid rgba(46,217,195,0.35);
+        }
+
+        .result-box strong {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--teal);
+            font-size: 12.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 10px;
+        }
+
+        .link-readout {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #0E141C;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+
+        .link-readout a {
+            flex: 1;
+            min-width: 0;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            text-decoration: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .link-readout a:hover { color: var(--teal); }
+
+        .copy-btn {
+            flex-shrink: 0;
+            background: var(--border-soft);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover { color: var(--teal); border-color: var(--teal); }
+
+        .error-box {
+            background: var(--coral-dim);
+            border: 1px solid rgba(255,107,107,0.35);
+            color: #FFB4B4;
+            display: flex;
+            gap: 8px;
+        }
+
+        .error-box strong { color: var(--coral); font-weight: 600; }
     </style>
 </head>
 <body>
-    <h2 style="text-align: center; margin-bottom: 20px;">File to Link Converter</h2>
-    <div class="card">
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="file" name="myfile" required><br>
-            <button type="submit" class="btn">Generate Shareable Link</button>
-        </form>
-        
-        {% if link %}
-            <div class="result-box">
-                <strong>Link successfully generated:</strong><br><br>
-                <a href="{{ link }}" target="_blank">{{ link }}</a>
-            </div>
-        {% endif %}
+    <div class="wrap">
+        <div class="eyebrow"><span class="dot"></span>SECURE FILE TRANSFER</div>
+        <h1>Turn any file into a shareable link</h1>
+        <p class="subtitle">Upload once, share anywhere. Your file gets a permanent link the moment it lands.</p>
+
+        <div class="card">
+            <form method="post" enctype="multipart/form-data" id="upload-form">
+                {% csrf_token %}
+
+                <label class="dropzone" id="dropzone" tabindex="0">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 16V4M12 4l-4 4M12 4l4 4"/>
+                        <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+                    </svg>
+                    <div class="dz-label" id="dz-label">Drag & drop a file, or click to browse</div>
+                    <div class="dz-sub">Any file type, up to your plan's size limit</div>
+                    <span class="dz-filename" id="dz-filename" style="display:none;"></span>
+                    <input type="file" name="myfile" id="file-input" required>
+                </label>
+
+                <div class="input-group">
+                    <label for="custom_name">Customize link ending (optional)</label>
+                    <div class="link-field">
+                        <span class="link-prefix">yourapp.com/f/</span>
+                        <input type="text" id="custom_name" name="custom_name" placeholder="my-awesome-file" autocomplete="off">
+                    </div>
+                    <div id="status-msg"></div>
+                </div>
+
+                <button type="submit" id="submit-btn" class="btn">
+                    <span class="spinner" id="btn-spinner"></span>
+                    <span id="btn-label">Generate shareable link</span>
+                </button>
+            </form>
+
+            {% if link %}
+                <div class="result-box">
+                    <strong>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+                        Link generated
+                    </strong>
+                    <div class="link-readout">
+                        <a href="{{ link }}" target="_blank" id="generated-link">{{ link }}</a>
+                        <button type="button" class="copy-btn" id="copy-btn" data-link="{{ link }}">Copy</button>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if error %}
+                <div class="error-box">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+                    <div><strong>Error:</strong> {{ error }}</div>
+                </div>
+            {% endif %}
+        </div>
     </div>
+
+    <script>
+        const input = document.getElementById('custom_name');
+        const statusMsg = document.getElementById('status-msg');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnSpinner = document.getElementById('btn-spinner');
+        const btnLabel = document.getElementById('btn-label');
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+        const dzLabel = document.getElementById('dz-label');
+        const dzFilename = document.getElementById('dz-filename');
+        const form = document.getElementById('upload-form');
+
+        // Live slug availability check
+        input.addEventListener('input', function () {
+            let value = this.value.trim().toLowerCase();
+            value = value.replace(/[^a-z0-9-_]/g, '');
+            this.value = value;
+
+            if (value.length === 0) {
+                statusMsg.innerHTML = '';
+                submitBtn.disabled = false;
+                return;
+            }
+
+            fetch(`/api/check-availability/?slug=${value}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.available) {
+                        statusMsg.innerHTML = '<span style="color:#2ED9C3;">&#10003; This link name is available</span>';
+                        submitBtn.disabled = false;
+                    } else {
+                        statusMsg.innerHTML = '<span style="color:#FF6B6B;">&#10007; That link name is already taken</span>';
+                        submitBtn.disabled = true;
+                    }
+                })
+                .catch(() => {
+                    statusMsg.innerHTML = '';
+                });
+        });
+
+        // File selection + filename preview
+        fileInput.addEventListener('change', function () {
+            if (this.files && this.files.length > 0) {
+                dzLabel.textContent = 'Ready to upload';
+                dzFilename.style.display = 'inline-block';
+                dzFilename.textContent = this.files[0].name;
+            }
+        });
+
+        // Drag-over visual state
+        ['dragenter', 'dragover'].forEach(evt => {
+            dropzone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                dropzone.classList.add('drag-over');
+            });
+        });
+        ['dragleave', 'drop'].forEach(evt => {
+            dropzone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('drag-over');
+            });
+        });
+        dropzone.addEventListener('drop', (e) => {
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+        // Loading state on submit
+        form.addEventListener('submit', function () {
+            if (submitBtn.disabled) return;
+            submitBtn.disabled = true;
+            btnSpinner.style.display = 'inline-block';
+            btnLabel.textContent = 'Generating…';
+        });
+
+        // Copy link to clipboard
+        const copyBtn = document.getElementById('copy-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function () {
+                navigator.clipboard.writeText(this.dataset.link).then(() => {
+                    const original = this.textContent;
+                    this.textContent = 'Copied';
+                    setTimeout(() => { this.textContent = original; }, 1500);
+                });
+            });
+        }
+    </script>
 </body>
 </html>
