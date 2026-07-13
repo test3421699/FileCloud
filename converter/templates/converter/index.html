@@ -101,6 +101,7 @@
             border-radius: 16px;
             padding: clamp(18px, 5vw, 28px);
             box-shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
+            margin-bottom: 24px;
         }
 
         /* Dropzone */
@@ -183,7 +184,7 @@
             pointer-events: none;
         }
 
-        /* Custom link input and Select drop-down styling */
+        /* Form groups */
         .input-group { margin-top: 22px; text-align: left; }
 
         .input-group label {
@@ -206,9 +207,7 @@
             transition: border-color 0.15s ease;
         }
 
-        .link-field:focus-within {
-            border-color: var(--teal);
-        }
+        .link-field:focus-within { border-color: var(--teal); }
 
         .link-prefix {
             padding: 10px 8px 10px 12px;
@@ -249,13 +248,8 @@
             cursor: pointer;
         }
 
-        .input-group select:focus {
-            border-color: var(--teal);
-        }
-
-        .input-group input[type="text"]::placeholder {
-            color: #4B5666;
-        }
+        .input-group select:focus { border-color: var(--teal); }
+        .input-group input[type="text"]::placeholder { color: #4B5666; }
 
         #status-msg {
             display: flex;
@@ -267,7 +261,7 @@
             min-height: 16px;
         }
 
-        /* Button */
+        /* Buttons */
         .btn {
             width: 100%;
             margin-top: 22px;
@@ -289,17 +283,7 @@
 
         .btn:hover:not(:disabled) { filter: brightness(1.08); }
         .btn:active:not(:disabled) { transform: scale(0.99); }
-
-        .btn:disabled {
-            background: #2A313C;
-            color: #6B7686;
-            cursor: not-allowed;
-        }
-
-        .btn:focus-visible, .dropzone:focus-within, .input-group input:focus-visible, .input-group select:focus-visible {
-            outline: 2px solid var(--teal);
-            outline-offset: 2px;
-        }
+        .btn:disabled { background: #2A313C; color: #6B7686; cursor: not-allowed; }
 
         .spinner {
             width: 14px;
@@ -313,7 +297,7 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Result / error */
+        /* Output Boxes */
         .result-box, .error-box {
             margin-top: 22px;
             padding: 16px;
@@ -321,61 +305,16 @@
             font-size: 13.5px;
         }
 
-        .result-box {
-            background: var(--teal-dim);
-            border: 1px solid rgba(46,217,195,0.35);
-        }
+        .result-box { background: var(--teal-dim); border: 1px solid rgba(46,217,195,0.35); }
+        .result-box strong { display: flex; align-items: center; gap: 6px; color: var(--teal); font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
 
-        .result-box strong {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--teal);
-            font-size: 12.5px;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            margin-bottom: 10px;
-        }
-
-        .link-readout {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #0E141C;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 12px;
-        }
-
-        .link-readout a {
-            flex: 1;
-            min-width: 0;
-            color: var(--text);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12.5px;
-            text-decoration: none;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
+        .link-readout { display: flex; align-items: center; gap: 8px; background: #0E141C; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+        .link-readout a { flex: 1; min-width: 0; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 12.5px; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .link-readout a:hover { color: var(--teal); }
 
-        .copy-btn {
-            flex-shrink: 0;
-            background: var(--border-soft);
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            border-radius: 6px;
-            padding: 6px 10px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11.5px;
-            cursor: pointer;
-        }
-
+        .copy-btn { flex-shrink: 0; background: var(--border-soft); border: 1px solid var(--border); color: var(--text-muted); border-radius: 6px; padding: 6px 10px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; cursor: pointer; }
         .copy-btn:hover { color: var(--teal); border-color: var(--teal); }
 
-        /* Realtime Ticker Area styling */
         .expiry-ticker {
             margin-top: 12px;
             display: flex;
@@ -390,38 +329,22 @@
             border: 1px solid rgba(242,184,75,0.25);
         }
 
-        .error-box {
-            background: var(--coral-dim);
-            border: 1px solid rgba(255,107,107,0.35);
-            color: #FFB4B4;
-            display: flex;
-            gap: 8px;
-        }
-
+        .error-box { background: var(--coral-dim); border: 1px solid rgba(255,107,107,0.35); color: #FFB4B4; display: flex; gap: 8px; }
         .error-box strong { color: var(--coral); font-weight: 600; }
 
+        /* History Panel */
+        .history-section { display: none; margin-top: 32px; }
+        .history-title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .clear-history { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); cursor: pointer; border: none; background: transparent; }
+        .clear-history:hover { color: var(--coral); }
+        .history-item { background: var(--card); border: 1px solid var(--border-soft); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+        .history-filename { font-size: 13.5px; font-weight: 500; margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
         /* --- Responsive --- */
-        @media (min-width: 640px) {
-            .wrap { max-width: 520px; }
-        }
-
-        @media (max-width: 400px) {
-            .eyebrow { font-size: 11px; }
-            h1 { font-size: 21px; }
-            .subtitle { font-size: 13px; }
-            .link-prefix { display: none; }
-            .dz-sub { font-size: 12px; }
-        }
-
-        @media (hover: none) and (pointer: coarse) {
-            .btn, .copy-btn, .dropzone, .input-group input[type="text"], .input-group select {
-                min-height: 44px;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .dropzone::before { animation: none; }
-        }
+        @media (min-width: 640px) { .wrap { max-width: 520px; } }
+        @media (max-width: 400px) { .eyebrow { font-size: 11px; } h1 { font-size: 21px; } .subtitle { font-size: 13px; } .link-prefix { display: none; } .dz-sub { font-size: 12px; } }
+        @media (hover: none) and (pointer: coarse) { .btn, .copy-btn, .dropzone, .input-group input[type="text"], .input-group select { min-height: 44px; } }
+        @media (prefers-reduced-motion: reduce) { .dropzone::before { animation: none; } }
     </style>
 </head>
 <body>
@@ -449,7 +372,7 @@
                 <div class="input-group">
                     <label for="custom_name">Customize link ending (optional)</label>
                     <div class="link-field">
-                        <span class="link-prefix">yourapp.com/f/</span>
+                        <span class="link-prefix" id="ui-prefix">yourapp.com/f/</span>
                         <input type="text" id="custom_name" name="custom_name" placeholder="my-awesome-file" autocomplete="off">
                     </div>
                     <div id="status-msg"></div>
@@ -478,18 +401,17 @@
                 <div class="result-box">
                     <strong>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
-                        Link generated
+                        Direct Download Link Generated
                     </strong>
                     <div class="link-readout">
                         <a href="{{ link }}" target="_blank" id="generated-link">{{ link }}</a>
-                        <button type="button" class="copy-btn" id="copy-btn" data-link="{{ link }}">Copy</button>
+                        <button type="button" class="copy-btn copy-action-btn" data-link="{{ link }}">Copy</button>
                     </div>
                     
-                    <!-- New UI feature block: Live countdown container -->
                     {% if expires_at_iso %}
                     <div class="expiry-ticker">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points='12 6 12 12 16 14'/></svg>
-                        <span>Expires in: <span id="countdown" data-timestamp="{{ expires_at_iso }}">Calculating...</span></span>
+                        <span>Expires in: <span class="countdown-ticker" data-timestamp="{{ expires_at_iso }}">Calculating...</span></span>
                     </div>
                     {% endif %}
                 </div>
@@ -502,9 +424,21 @@
                 </div>
             {% endif %}
         </div>
+
+        <!-- History Dashboard Section -->
+        <div class="history-section" id="history-section">
+            <div class="history-title">
+                <span>Your Active Shared Files</span>
+                <button type="button" class="clear-history" id="clear-history-btn">Clear List</button>
+            </div>
+            <div id="history-container"></div>
+        </div>
     </div>
 
     <script>
+        // Update URL text prefix relative to current domain dynamically
+        document.getElementById('ui-prefix').textContent = window.location.host + '/download/';
+
         const input = document.getElementById('custom_name');
         const statusMsg = document.getElementById('status-msg');
         const submitBtn = document.getElementById('submit-btn');
@@ -515,6 +449,7 @@
         const dzLabel = document.getElementById('dz-label');
         const dzFilename = document.getElementById('dz-filename');
         const form = document.getElementById('upload-form');
+        const fileError = document.getElementById('file-error');
 
         // Live slug availability check
         input.addEventListener('input', function () {
@@ -538,110 +473,146 @@
                         statusMsg.innerHTML = '<span style="color:#FF6B6B;">&#10007; That link name is already taken</span>';
                         submitBtn.disabled = true;
                     }
-                })
-                .catch(() => {
-                    statusMsg.innerHTML = '';
-                });
+                }).catch(() => { statusMsg.innerHTML = ''; });
         });
 
-        const fileError = document.getElementById('file-error');
-
-        // Open native file picker exactly once per interaction
+        // Dropzone controls
         dropzone.addEventListener('click', () => fileInput.click());
-        dropzone.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                fileInput.click();
-            }
-        });
-
-        // File selection + filename preview
+        dropzone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+        
         fileInput.addEventListener('change', function () {
             if (this.files && this.files.length > 0) {
                 dzLabel.textContent = 'Ready to upload';
                 dzFilename.style.display = 'inline-block';
                 dzFilename.textContent = this.files[0].name;
                 fileError.style.display = 'none';
+                // Cache current filename temporarily for history inclusion
+                localStorage.setItem('last_uploaded_name', this.files[0].name);
             }
         });
 
-        // Drag-over visual state
-        ['dragenter', 'dragover'].forEach(evt => {
-            dropzone.addEventListener(evt, (e) => {
-                e.preventDefault();
-                dropzone.classList.add('drag-over');
-            });
-        });
-        ['dragleave', 'drop'].forEach(evt => {
-            dropzone.addEventListener(evt, (e) => {
-                e.preventDefault();
-                dropzone.classList.remove('drag-over');
-            });
-        });
+        ['dragenter', 'dragover'].forEach(evt => { dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); }); });
+        ['dragleave', 'drop'].forEach(evt => { dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove('drag-over'); }); });
         dropzone.addEventListener('drop', (e) => {
-            if (e.dataTransfer.files.length > 0) {
-                fileInput.files = e.dataTransfer.files;
-                fileInput.dispatchEvent(new Event('change'));
-            }
+            if (e.dataTransfer.files.length > 0) { fileInput.files = e.dataTransfer.files; fileInput.dispatchEvent(new Event('change')); }
         });
 
-        // Loading state on submit
         form.addEventListener('submit', function (e) {
-            if (!fileInput.files || fileInput.files.length === 0) {
-                e.preventDefault();
-                fileError.style.display = 'block';
-                return;
-            }
+            if (!fileInput.files || fileInput.files.length === 0) { e.preventDefault(); fileError.style.display = 'block'; return; }
             if (submitBtn.disabled) return;
             submitBtn.disabled = true;
             btnSpinner.style.display = 'inline-block';
             btnLabel.textContent = 'Generating…';
         });
 
-        // Copy link to clipboard
-        const copyBtn = document.getElementById('copy-btn');
-        if (copyBtn) {
-            copyBtn.addEventListener('click', function () {
-                navigator.clipboard.writeText(this.dataset.link).then(() => {
-                    const original = this.textContent;
-                    this.textContent = 'Copied';
-                    setTimeout(() => { this.textContent = original; }, 1500);
+        // Global clipboard registration
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('copy-action-btn')) {
+                navigator.clipboard.writeText(e.target.dataset.link).then(() => {
+                    const original = e.target.textContent;
+                    e.target.textContent = 'Copied';
+                    setTimeout(() => { e.target.textContent = original; }, 1500);
                 });
+            }
+        });
+
+        // --- LocalStorage Link Tracking Engine ---
+        const historySection = document.getElementById('history-section');
+        const historyContainer = document.getElementById('history-container');
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+
+        // Check if backend just handed back a new link to register
+        {% if link and expires_at_iso %}
+            const freshLink = "{{ link }}";
+            const freshExpiry = "{{ expires_at_iso }}";
+            const freshName = localStorage.getItem('last_uploaded_name') || "Shared File";
+            localStorage.removeItem('last_uploaded_name'); // Clear cached state
+
+            let currentHistory = JSON.parse(localStorage.getItem('file_link_history')) || [];
+            // De-duplicate if link matches an older item
+            currentHistory = currentHistory.filter(item => item.url !== freshLink);
+            currentHistory.unshift({ name: freshName, url: freshLink, expires: freshExpiry });
+            localStorage.setItem('file_link_history', JSON.stringify(currentHistory));
+        {% endif %}
+
+        function loadHistoryList() {
+            let historyData = JSON.parse(localStorage.getItem('file_link_history')) || [];
+            const now = new Date().getTime();
+
+            // Auto-filter out entries that have completely reached expiration 
+            historyData = historyData.filter(item => new Date(item.expires).getTime() - now > 0);
+            localStorage.setItem('file_link_history', JSON.stringify(historyData));
+
+            if (historyData.length === 0) {
+                historySection.style.display = 'none';
+                return;
+            }
+
+            historySection.style.display = 'block';
+            historyContainer.innerHTML = '';
+
+            historyData.forEach((item, index) => {
+                historyContainer.innerHTML += `
+                    <div class="history-item">
+                        <div class="history-filename">${item.name}</div>
+                        <div class="link-readout">
+                            <a href="${item.url}" target="_blank">${item.url}</a>
+                            <button type="button" class="copy-btn copy-action-btn" data-link="${item.url}">Copy</button>
+                        </div>
+                        <div class="expiry-ticker" style="margin-top: 10px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span>Expires in: <span class="countdown-ticker" data-timestamp="${item.expires}">Calculating...</span></span>
+                        </div>
+                    </div>
+                `;
             });
         }
 
-        // --- JavaScript Running Countdown Timer Engine ---
-        const countdownEl = document.getElementById('countdown');
-        if (countdownEl) {
-            const targetTime = new Date(countdownEl.dataset.timestamp).getTime();
+        clearHistoryBtn.addEventListener('click', () => {
+            localStorage.removeItem('file_link_history');
+            loadHistoryList();
+        });
 
-            function updateTimer() {
-                const now = new Date().getTime();
+        // --- Core Countdown Animation Ticker ---
+        function runGlobalCountdownTickers() {
+            const tickers = document.querySelectorAll('.countdown-ticker');
+            const now = new Date().getTime();
+            let stateChanged = false;
+
+            tickers.forEach(ticker => {
+                const targetTime = new Date(ticker.dataset.timestamp).getTime();
                 const difference = targetTime - now;
 
                 if (difference <= 0) {
-                    countdownEl.textContent = "Expired";
-                    countdownEl.style.color = "var(--coral)";
+                    ticker.textContent = "Expired";
+                    ticker.style.color = "var(--coral)";
+                    stateChanged = true;
                     return;
                 }
 
-                // Math for calculating days, hours, minutes, and seconds remaining
                 const days = Math.floor(difference / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
-                let displayString = "";
-                if (days > 0) displayString += `${days}d `;
-                if (hours > 0 || days > 0) displayString += `${hours}h `;
-                displayString += `${minutes}m ${seconds}s`;
+                let display = "";
+                if (days > 0) display += `${days}d `;
+                if (hours > 0 || days > 0) display += `${hours}h `;
+                display += `${minutes}m ${seconds}s`;
+                
+                ticker.textContent = display;
+            });
 
-                countdownEl.textContent = displayString;
+            // Re-render structural tree if any file cross-expired inside current session
+            if (stateChanged) {
+                setTimeout(loadHistoryList, 1500);
             }
-
-            updateTimer(); // Initial kickstart immediately
-            setInterval(updateTimer, 1000); // Ticks every 1 second
         }
+
+        // Execution Hooks
+        loadHistoryList();
+        runGlobalCountdownTickers();
+        setInterval(runGlobalCountdownTickers, 1000);
     </script>
 </body>
 </html>
